@@ -21,7 +21,7 @@ class YahooDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self,idx):
-        if torch.is_tnesor(idx):
+        if torch.is_tensor(idx):
             idx = idx.tolist()
         
         data = self.dataset[idx]
