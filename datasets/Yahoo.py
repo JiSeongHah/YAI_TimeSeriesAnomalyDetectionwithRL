@@ -12,7 +12,6 @@ from config import get_parse
 
 class YahooDataset(Dataset):
 
-
     def __init__(self, dataset):
         super(Dataset,self).__init__()
         self.dataset = dataset
@@ -21,7 +20,7 @@ class YahooDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self,idx):
-        if torch.is_tnesor(idx):
+        if torch.is_tensor(idx):
             idx = idx.tolist()
         
         data = self.dataset[idx]
