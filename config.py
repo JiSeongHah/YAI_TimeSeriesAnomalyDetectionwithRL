@@ -9,7 +9,7 @@ def get_parse():
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     #data
-    args.datasets = 'Yahoo'
+    args.datasets = 'Yahoo' # Yahoo, SWaT, Numenta, KPI 
     args.window_size = #
     args.input_size = #
 
