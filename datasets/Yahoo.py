@@ -6,6 +6,16 @@ import os
 import glob
 from config import get_parse
 
+def build_yahoo(args):
+    train, test = Yahoo_Dataprocessing(args)
+
+    train_set = YahooDataset(train)
+    test_set = YahooDataset(test)
+
+    train_loader = DataLoader(train_set,shuffle = args.shuffle, num_workers = 2)
+    test_loader = DataLoader(test_set, shuffle = args.shuffle, num_workers = 2) 
+
+    return train_loader, test_loader
 
 class YahooDataset(Dataset):
 
@@ -80,15 +90,3 @@ def Yahoo_Dataprocessing(args):
     test = dataset[split_bar:]
     
     return train, test
-
-
-
-# if __name__=="__main__":
-#     args = get_parse()
-#     train, test = Yahoo_Dataprocessing(args)
-#     train_set = YahooDataset(train)
-#     test_set = YahooDataset(test)   
-
-#     train_loader = DataLoader(train_set, batch_size= args.batch_size, shuffle= args.shuffle,num_workers= 2)
-#     test_loader = DataLoader(test_set, batch_size = args.bathc_size, shuffle = args.shuffle, num_workers=2)
-
