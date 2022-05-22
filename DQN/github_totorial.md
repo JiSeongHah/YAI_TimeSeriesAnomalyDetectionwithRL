@@ -4,6 +4,7 @@
 * Refresh
 * click plus icon -> staging
 * click check icon -> commit
+* write command of each files
 * Open terminal (View/terminal = ctrl+')
 * write below
     * git remote add origin https://github.com/JiSeongHah/YAI_TimeSeriesAnomalyDetectionwithRL.git
