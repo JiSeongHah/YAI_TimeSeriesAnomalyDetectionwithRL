@@ -5,43 +5,51 @@ from torch.utils.data import Dataset, DataLoader
 import os
 import glob
 from config import get_parse
+from util import sliding_window 
 
 def build_yahoo(args):
     train, test = Yahoo_Dataprocessing(args)
 
-    train_set = YahooDataset(train)
-    test_set = YahooDataset(test)
+    train_state = sliding_window(train, args)
+    test_state = sliding_window(test, args)
 
-    train_loader = DataLoader(train_set,shuffle = args.shuffle, num_workers = 2)
-    test_loader = DataLoader(test_set, shuffle = args.shuffle, num_workers = 2) 
+    train_set = YahooDataset(train_state)
+    test_set = YahooDataset(test_state)
+
+    train_loader = DataLoader(train_set, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2)
+    test_loader = DataLoader(test_set, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2) 
 
     return train_loader, test_loader
 
 class YahooDataset(Dataset):
 
     def __init__(self, dataset):
-        super(Dataset,self).__init__()
-        self.dataset = dataset
+        super(YahooDataset,self).__init__()
+
+        self.timestamp = dataset['timestamp']
+        self.value = dataset['value']
+        self.label = dataset['label']
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.timestamp)
 
     def __getitem__(self,idx):
-        if torch.is_tensor(idx):
+        if torch.is_tnesor(idx):
             idx = idx.tolist()
         
-        data = self.dataset[idx]
+        timestamp = self.timestamp[idx]
+        value = self.value[idx]
+        label = self.label[idx]
 
-        time_stamps = np.array(data['timestamp'])
-        values = np.array(data['value']) 
-        labels = np.array(data['label']) 
+        time_stamp = np.array(timestamp)
+        value = np.array(value) 
+        label = np.array(label) 
 
         # normalize
-        values = (values - values.mean()) / values.std()
+        value = (value - value.mean()) / value.std()
 
-        return time_stamps, values, labels
+        return time_stamp, value, label
 
-    
 def Yahoo_Dataprocessing(args):
     
     files_a1 = glob.glob(os.path.join(args.data_path,"A1Benchmark/real_*.csv"))  #list
@@ -88,5 +96,5 @@ def Yahoo_Dataprocessing(args):
         
     train = dataset[:split_bar] # list of sets
     test = dataset[split_bar:]
-    
+
     return train, test
