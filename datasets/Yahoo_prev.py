@@ -1,16 +1,13 @@
-from audioop import minmax
 import torch
 import pandas as pd 
 import numpy as np
 
 from torch.utils.data import Dataset, DataLoader
-from sklearn.preprocessing import minmax_scale
 
 import os
 import glob
 
 from util.sliding_window import sliding_window 
-
 
 
 def build_yahoo(args): 
@@ -45,11 +42,14 @@ class YahooDataset(Dataset):
         
         timestamp = self.timestamp[idx]
         value = self.value[idx]
-        label = self.label[idx][-1]
+        label = self.label[idx]
 
         time_stamp = np.array(timestamp)
         value = np.array(value) 
         label = np.array(label)
+
+        # normalize
+        value = (value - value.mean()) / value.std()
 
         return time_stamp, value, label
 
@@ -71,14 +71,14 @@ def Yahoo_Dataprocessing(args):
         df = pd.read_csv(fn)
         if i < split_bar[0]: # train
             train.append({
-            'timestamp': df['timestamp'].tolist(),
-            'value': minmax_scale(df['value'].tolist()),
+            'timestamp': (1483225200 + 3600 * df['timestamp']).tolist(),
+            'value': df['value'].tolist(),
             'label': df['is_anomaly'].tolist()
             })
         else: #test
             test.append({
-            'timestamp': df['timestamp'].tolist(),
-            'value': minmax_scale(df['value'].tolist()),
+            'timestamp': (1483225200 + 3600 * df['timestamp']).tolist(),
+            'value': df['value'].tolist(),
             'label': df['is_anomaly'].tolist()
             })
     for i, fn in enumerate(files_a2):
@@ -86,13 +86,13 @@ def Yahoo_Dataprocessing(args):
         if i < split_bar[1]: # train
             train.append({
                 'timestamp': df['timestamp'].tolist(),
-                'value': minmax_scale(df['value'].tolist()),
+                'value': df['value'].tolist(),
                 'label': df['is_anomaly'].tolist()
                 })
         else: #tesst
             test.append({
-            'timestamp': df['timestamp'].tolist(),
-            'value': minmax_scale(df['value'].tolist()),
+            'timestamp': (1483225200 + 3600 * df['timestamp']).tolist(),
+            'value': df['value'].tolist(),
             'label': df['is_anomaly'].tolist()
             })
     assert len(train) + len(test)  == 167, 'Error'

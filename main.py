@@ -17,16 +17,17 @@ def main(args):
         pass
     
     # 데이터 어떻게 찍히는지 보고 감잡기
-    #for time_stamp, value, label in (train_loader):
-        #print(f'time_stamp : {time_stamp}')
-        #print(f'value : {value},{value.size()}')
-        #print(f'label : {label},{label.size()}')
-        #print('-'*80)
+    for time_stamp, value, label in (train_loader):
+        print(f'time_stamp : {time_stamp}')
+        print(f'value : {value},{value.size()}')
+        print(f'label : {label},{label.size()}')
+        print('-'*80)
 
 
 
 if __name__ == '__main__': 
     args = get_parse()
-    #main(args)
-    main_ppo()
+    main(args)
+    #main_ppo()
     print('run')
+    print('runn')
