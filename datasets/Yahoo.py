@@ -71,13 +71,13 @@ def Yahoo_Dataprocessing(args):
         df = pd.read_csv(fn)
         if i < split_bar[0]: # train
             train.append({
-            'timestamp': (df['timestamp']).tolist(),
+            'timestamp': df['timestamp'].tolist(),
             'value': minmax_scale(df['value'].tolist()),
             'label': df['is_anomaly'].tolist()
             })
         else: #test
             test.append({
-            'timestamp': (df['timestamp']).tolist(),
+            'timestamp': df['timestamp'].tolist(),
             'value': minmax_scale(df['value'].tolist()),
             'label': df['is_anomaly'].tolist()
             })
@@ -91,7 +91,7 @@ def Yahoo_Dataprocessing(args):
                 })
         else: #tesst
             test.append({
-            'timestamp': (df['timestamp']).tolist(),
+            'timestamp': df['timestamp'].tolist(),
             'value': minmax_scale(df['value'].tolist()),
             'label': df['is_anomaly'].tolist()
             })
