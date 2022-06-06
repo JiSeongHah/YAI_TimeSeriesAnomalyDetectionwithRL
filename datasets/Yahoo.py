@@ -22,10 +22,12 @@ def build_yahoo(args):
     train = YahooDataset(train)
     test = YahooDataset(test)
 
-    train_loader = DataLoader(train, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2)
-    test_loader = DataLoader(test, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2) 
+#    split_idx = 72874-1
+    
+    # train_loader = DataLoader(train, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2)
+    # test_loader = DataLoader(test, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2) 
 
-    return train_loader, test_loader
+    return train, test
 
 class YahooDataset(Dataset):
 
@@ -45,7 +47,7 @@ class YahooDataset(Dataset):
         
         timestamp = self.timestamp[idx]
         value = self.value[idx]
-        label = self.label[idx][-1]
+        label = self.label[idx]
 
         time_stamp = np.array(timestamp)
         value = np.array(value) 
@@ -64,7 +66,7 @@ def Yahoo_Dataprocessing(args):
     split_bar = np.array([len(files_a1),len(files_a2)])
     split_bar = args.split_ratio * split_bar
     split_bar = np.asarray(split_bar,dtype = int)
-    
+
     train = []    
     test = []
     for i, fn  in enumerate(files_a1):
@@ -80,7 +82,7 @@ def Yahoo_Dataprocessing(args):
             'timestamp': df['timestamp'].tolist(),
             'value': minmax_scale(df['value'].tolist()),
             'label': df['is_anomaly'].tolist()
-            })
+             })
     for i, fn in enumerate(files_a2):
         df = pd.read_csv(fn)
         if i < split_bar[1]: # train
