@@ -22,11 +22,10 @@ def build_yahoo(args):
     train = YahooDataset(train)
     test = YahooDataset(test)
 
-#    split_idx = 72874-1
+#     split_idx = 72874
+#     a_1 train = train[:split_idx]
+#     a_2 train = train[split_idx:]
     
-    # train_loader = DataLoader(train, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2)
-    # test_loader = DataLoader(test, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2) 
-
     return train, test
 
 class YahooDataset(Dataset):
