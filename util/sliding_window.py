@@ -7,7 +7,7 @@ def sliding_window(dataset : list,args):
 
         if args.datasets == 'Yahoo':
             
-            state = {} #OUTPUT; consist of timestamp, value, label
+            state_set = {} #OUTPUT; consist of timestamp, value, label
             time_state =[]  # sliding_window
             value_state = []
             label_state = []
@@ -17,21 +17,28 @@ def sliding_window(dataset : list,args):
                 val = np.array(data_i['value']) 
                 label = np.array(data_i['label'])
                 
+                time_i = []
+                value_i = []
+                label_i = []
                 num_samples = len(ts) - ws + 1
                 for j in range(num_samples):
                     ts_ = ts[j:j+ws]   #list
                     val_ = val[j:j+ws]
-                    lab_ = label[j:j+ws]
+                    lab_ = label[j+ws-1]
 
-                    time_state.append(ts_)
-                    value_state.append(val_)
-                    label_state.append(lab_)
+                    time_i.append(ts_)
+                    value_i.append(val_)
+                    label_i.append(lab_)
 
-            state['timestamp'] = time_state
-            state['value'] = value_state
-            state['label'] = label_state      
+                time_state.append(time_i)
+                value_state.append(value_i)
+                label_state.append(label_i)
 
-            return state
+            state_set['timestamp'] = time_state
+            state_set['value'] = value_state
+            state_set['label'] = label_state      
+
+            return state_set
 
         elif args.datasets == 'SWaT':
             pass
