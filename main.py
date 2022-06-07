@@ -4,7 +4,7 @@ from datasets.Yahoo import build_yahoo
 def main(args):
     
     if args.datasets == 'Yahoo':
-        train_loader ,test_loader = build_yahoo(args)
+        train ,test = build_yahoo(args)
         
     elif args.dataset == 'SWaT':
         pass 
@@ -14,13 +14,14 @@ def main(args):
 
     elif args.dataset == 'Numenta':
         pass
+    # if A1
     
-    # 데이터 어떻게 찍히는지 보고 감잡기
-    for time_stamp, value, label in (train_loader):
-        print(f'time_stamp : {time_stamp}')
-        print(f'value : {value},{value.size()}')
-        print(f'label : {label},{label.size()}')
-        print('-'*80)
+    print("if A1 DATASET,")
+    for i, real_i in enumerate(train):
+        ts, val, label = real_i
+        print(f"real_{str(i)}timestamp:{ts},{ts.shape}")
+        print(f"value:{val},{val.shape}")
+        print(f"label:{label}.{label.shape}")
 
 
 
