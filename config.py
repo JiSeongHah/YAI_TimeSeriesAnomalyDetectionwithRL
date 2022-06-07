@@ -10,7 +10,7 @@ def get_parse():
 
     #data
     args.datasets = 'Yahoo'  # Yahoo, SWaT, Numenta, KPI
-    
+    args.using_data = 'A1' #'A1', 'A2'
     args.data_path = ''
 
     args.shuffle = False
