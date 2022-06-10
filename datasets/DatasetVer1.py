@@ -56,7 +56,10 @@ class datasetVer1(Dataset):
 
         if self.scalingMethod == 'minMax':
             MaxValue = torch.max(inputData)
-            inputData = inputData / MaxValue
+            MinValue = torch.min(inputData)
+
+            inputData = (inputData -MinValue)/ (MaxValue- MinValue)
+
         elif self.scalingMethod == 'zScore':
             MeanValue = torch.mean(inputData)
             stdValue = torch.std(inputData)
