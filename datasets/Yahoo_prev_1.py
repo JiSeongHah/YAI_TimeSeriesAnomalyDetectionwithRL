@@ -3,7 +3,7 @@ import torch
 import pandas as pd 
 import numpy as np
 
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import minmax_scale
 
 import os
@@ -22,7 +22,10 @@ def build_yahoo(args):
     train = YahooDataset(train)
     test = YahooDataset(test)
 
-    return train, test
+    train_loader = DataLoader(train, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2)
+    test_loader = DataLoader(test, batch_size = args.batch_size, shuffle = args.shuffle, num_workers = 2) 
+
+    return train_loader, test_loader
 
 class YahooDataset(Dataset):
 
@@ -42,7 +45,7 @@ class YahooDataset(Dataset):
         
         timestamp = self.timestamp[idx]
         value = self.value[idx]
-        label = self.label[idx]
+        label = self.label[idx][-1]
 
         time_stamp = np.array(timestamp)
         value = np.array(value) 
@@ -61,39 +64,37 @@ def Yahoo_Dataprocessing(args):
     split_bar = np.array([len(files_a1),len(files_a2)])
     split_bar = args.split_ratio * split_bar
     split_bar = np.asarray(split_bar,dtype = int)
-
+    
     train = []    
     test = []
-    if args.using_data == 'A1':
-        for i, fn  in enumerate(files_a1):
-            df = pd.read_csv(fn)
-            if i < split_bar[0]: # train
-                train.append({
+    for i, fn  in enumerate(files_a1):
+        df = pd.read_csv(fn)
+        if i < split_bar[0]: # train
+            train.append({
+            'timestamp': df['timestamp'].tolist(),
+            'value': minmax_scale(df['value'].tolist()),
+            'label': df['is_anomaly'].tolist()
+            })
+        else: #test
+            test.append({
+            'timestamp': df['timestamp'].tolist(),
+            'value': minmax_scale(df['value'].tolist()),
+            'label': df['is_anomaly'].tolist()
+            })
+    for i, fn in enumerate(files_a2):
+        df = pd.read_csv(fn)
+        if i < split_bar[1]: # train
+            train.append({
                 'timestamp': df['timestamp'].tolist(),
                 'value': minmax_scale(df['value'].tolist()),
                 'label': df['is_anomaly'].tolist()
                 })
-            else: #test
-                test.append({
-                'timestamp': df['timestamp'].tolist(),
-                'value': minmax_scale(df['value'].tolist()),
-                'label': df['is_anomaly'].tolist()
-                })
-    elif args.using_data == 'A2':
-        for i, fn in enumerate(files_a2):
-            df = pd.read_csv(fn)
-            if i < split_bar[1]: # train
-                train.append({
-                'timestamp': df['timestamp'].tolist(),
-                'value': minmax_scale(df['value'].tolist()),
-                'label': df['is_anomaly'].tolist()
-                })
-            else: #tesst
-                test.append({
-                'timestamp': df['timestamp'].tolist(),
-                'value': minmax_scale(df['value'].tolist()),
-                'label': df['is_anomaly'].tolist()
-                })
-    # assert len(train) + len(test)  == 167, 'Error'
+        else: #tesst
+            test.append({
+            'timestamp': df['timestamp'].tolist(),
+            'value': minmax_scale(df['value'].tolist()),
+            'label': df['is_anomaly'].tolist()
+            })
+    assert len(train) + len(test)  == 167, 'Error'
 
     return train, test
