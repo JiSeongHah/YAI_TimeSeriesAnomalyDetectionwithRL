@@ -1,7 +1,8 @@
+
 import torch
 import os
 import pickle
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset,DataLoader
 from torchvision import transforms
 import numpy as np
 import json
@@ -9,8 +10,7 @@ import random
 import csv
 
 
-class datasetVer1(torch.utils.data.Dataset):
-    
+class datasetVer1(Dataset):
     def __init__(self,
                  baseDir,
                  task,
@@ -25,62 +25,85 @@ class datasetVer1(torch.utils.data.Dataset):
         self.scalingMethod = scalingMethod
 
         if self.task == 'trn':
-            dataFolderDir = self.baseDir+'trainDir/'
+            # assume that there's already trainDir folder by splitData module
+            self.dataFolderDir = self.baseDir+'trainDir/'
         else:
-            dataFolderDir = self.baseDir + 'testDir/'
+            # assume that there's already testDir folder by splitData module
+            self.dataFolderDir = self.baseDir + 'testDir/'
 
-        self.pickedFolder = random.choice(os.listdir(dataFolderDir))
+        # select certain csv file to load
+        self.pickedFolder = random.choice(os.listdir(self.dataFolderDir))
 
-        with open(dataFolderDir+self.pickedFolder,'r') as f:
+
+        # open csv file and change into torch tensor
+        with open(self.dataFolderDir+self.pickedFolder,'r') as f:
             rdr = csv.reader(f)
-            self.DATAArr = np.asarray(list(rdr)[1:]).astype(float)
+            self.dataArr = np.asarray(list(rdr)[1:]).astype(float)
 
-        self.DATAArr = torch.from_numpy(self.DATAArr)
-
-        self.dataArr = torch.zeros(30,5)
+        self.dataArr = torch.from_numpy(self.dataArr)
 
 
     def __len__(self):
 
-        return int(len(self.dataArr)/100)
-
-        # return len(self.dataArr) - self.windowSize
+        return len(self.dataArr) -self.windowSize + 1
 
 
     def __getitem__(self, idx):
 
-        dataInScope = self.DATAArr[idx:idx+self.windowSize,:]
-
+        # data slice
+        dataInScope = self.dataArr[idx:idx+self.windowSize,:]
+        # because input data is on column 1
         inputData = dataInScope[:,1]
 
         if self.scalingMethod == 'minMax':
             MaxValue = torch.max(inputData)
-            inputData = inputData / MaxValue
+            MinValue = torch.min(inputData)
+
+            inputData = (inputData -MinValue)/ (MaxValue- MinValue)
+
         elif self.scalingMethod == 'zScore':
             MeanValue = torch.mean(inputData)
             stdValue = torch.std(inputData)
 
             inputData = (inputData-MeanValue)/stdValue
 
+        #choose label of last time stamp
+        # because label is on the column 2
         label = dataInScope[-1,2]
-        print('idx is : ',idx)
-        print('total len is : ',len(self.dataArr))
+
 
         return inputData,label
 
+    # change csv file to use different file
+    def changeFolder(self):
+
+        exFolder = self.pickedFolder
+        self.pickedFolder = random.choice(os.listdir(self.dataFolderDir))
+        print(f'changing from {exFolder} to current : {self.pickedFolder} complete')
+
+        with open(self.dataFolderDir+self.pickedFolder,'r') as f:
+            rdr = csv.reader(f)
+            self.dataArr = np.asarray(list(rdr)[1:]).astype(float)
+
+        self.dataArr = torch.from_numpy(self.dataArr)
 
 
-dir ='/home/a286winteriscoming/Downloads/TimeSeriesAnomalyDataset/Yahoo/' \
-     'Yahoo/ydata-labeled-time-series-anomalies-v1_0/A1Benchmark/'
 
-
-DATASET = datasetVer1(baseDir=dir,
-                      task='trn',
-                      windowSize=13,
-                      scalingMethod='minMax')
-
-for Input,label in DATASET:
-
-    print(Input.size(),label)
-
-
+# dir ='/home/a286winteriscoming/Downloads/TimeSeriesAnomalyDataset/Yahoo/' \
+#      'Yahoo/ydata-labeled-time-series-anomalies-v1_0/A1Benchmark/'
+#
+#
+# DATASET = datasetVer1(baseDir=dir,
+#                       task='trn',
+#                       windowSize=13,
+#                       scalingMethod='minMax')
+#
+#
+# dl = DataLoader(DATASET,batch_size=1,shuffle=True)
+# for inputs,label in dl:
+#     print(inputs.size(),label)
+# for Input,label in DATASET:
+#
+#     print(Input.size(),label)
+#
+#

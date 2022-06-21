@@ -138,7 +138,6 @@ class TwinnedQNetwork(nn.Module):
 class ActorNetwork(nn.Module):
     def __init__(self,
                  input_dims,
-                 max_action,
                  fc1_dims=256,
                  fc2_dims=256,
                  n_actions=2,
@@ -155,7 +154,6 @@ class ActorNetwork(nn.Module):
         self.gpuUse = gpuUse
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name+'_sac')
-        self.max_action = max_action
 
 
         self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
@@ -164,6 +162,7 @@ class ActorNetwork(nn.Module):
 
 
         self.optimizer = optim.Adam(self.parameters(), lr=3e-4)
+
         if self.gpuUse == True:
             USE_CUDA = torch.cuda.is_available()
             print(USE_CUDA)
@@ -184,8 +183,14 @@ class ActorNetwork(nn.Module):
 
         return actionProb
 
-    def sample(self, state):
+    def act(self,state):
+        # do greedy action
+        actionProbs = self.forward(state)
 
+        return torch.argmax(actionProbs,dim=1,keepdim=True)
+
+    def sample(self, state):
+        # do action by probs which proportional to actionProb
         actionProbs = F.softmax(self.forward(state),dim=1)
         actionDist = Categorical(actionProbs)
         actions = actionDist.sample().view(-1,1)

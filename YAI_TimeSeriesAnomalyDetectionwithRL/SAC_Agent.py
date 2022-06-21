@@ -6,11 +6,13 @@ from SAC_Buffer import ReplayBuffer
 from SAC_networks import ActorNetwork, TwinnedQNetwork
 from torch.optim import Adam
 from UTILS import disable_gradients
+import datasets.datasetVer1 as theDataset
+from torch.utils.data import DataLoader
+
 
 class Agent():
     def __init__(self,
                  input_dims=[8],
-                 env=None,
                  gpuUse= True,
                  lr=3e-4,
                  gamma=0.99,
@@ -26,7 +28,7 @@ class Agent():
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
         self.batch_size = batch_size
         self.n_actions = n_actions
-        self.gpuUse = True
+        self.gpuUse = gpuUse
         self.scale = reward_scale
         self.update_network_parameters(tau=1)
         self.targetEntropyRatio = targetEntropyRatio
@@ -34,8 +36,8 @@ class Agent():
 
         self.actor = ActorNetwork(input_dims,
                                   n_actions=n_actions,
-                                  name='actor',
-                                  max_action=env.action_space.high)
+                                  name='actor'
+                                  )
 
         self.onlineCritic = TwinnedQNetwork(input_dims=input_dims,
                                             num_actions=n_actions,
@@ -72,18 +74,25 @@ class Agent():
         self.q2_optim = Adam(self.onlineCritic.Q2.parameters(), lr=lr)
 
         # Target entropy is -log(1/|A|) * ratio (= maximum entropy * ratio).
-        self.targetEntropy = -np.log(1.0 / self.env)
+        self.targetEntropy = -np.log(1.0 / self.n_actions)*self.targetEntropyRatio
 
         # We optimize log(alpha), instead of alpha.
         self.logAlpha = torch.zeros(1, requires_grad=True, device=self.device)
         self.alpha = self.logAlpha.exp()
         self.alpha_optim = Adam([self.logAlpha], lr=lr)
 
-    def choose_action(self, observation):
-        state = torch.Tensor([observation]).to(self.actor.device)
-        actions, _ = self.actor.sample_normal(state, reparameterize=False)
+    def explore(self, state):
+        # Act with randomness. when training
+        with torch.no_grad():
+            action, _, _ = self.actor.sample(state)
+        return action.item()
 
-        return actions.cpu().detach().numpy()[0]
+    def exploit(self, state):
+
+        # Act without randomness. when validating
+        with torch.no_grad():
+            action = self.actor.act(state)
+        return action.item()
 
     def remember(self,
                  state,
@@ -252,3 +261,15 @@ class Agent():
         self.critic_2.optimizer.step()
 
         self.update_network_parameters()
+
+
+
+
+
+
+
+
+
+
+
+

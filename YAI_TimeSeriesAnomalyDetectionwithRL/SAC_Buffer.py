@@ -35,3 +35,8 @@ class ReplayBuffer():
         BATCH = states, actions, rewards, states_, dones
 
         return BATCH
+
+
+buffur = ReplayBuffer(np.array([3]),5,7)
+
+print(buffur.mem_cntr % buffur.mem_size)
