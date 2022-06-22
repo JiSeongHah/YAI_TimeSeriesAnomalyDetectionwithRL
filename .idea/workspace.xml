@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="f6a96a96-87c8-4c4c-bc93-b75e36280709" name="Changes" comment="test commit 2">
       <change afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/SAC_doEpisode.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util/getReward.py" afterDir="false" />
@@ -9,12 +10,19 @@
       <change beforePath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/SAC_innerLoop.py" beforeDir="false" afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/SAC_Agent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/SAC_networks.py" beforeDir="false" afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/SAC_networks.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets/datasetVer1.py" beforeDir="false" afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets/datasetVer1.py" afterDir="false" />
+=======
+    <list default="true" id="69e47fba-9d4e-4851-9fde-ffc79ffcd8ae" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets/datasetVer1.py" beforeDir="false" afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets/datasetVer1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/prac2.py" beforeDir="false" afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/prac2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util/splitData.py" beforeDir="false" afterPath="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util/splitData.py" afterDir="false" />
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+<<<<<<< HEAD
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -22,18 +30,25 @@
       </list>
     </option>
   </component>
+=======
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+<<<<<<< HEAD
   <component name="ProjectId" id="29nCAcDUpue62WUD7hqkVyyz6bv" />
+=======
+  <component name="ProjectId" id="2ANavArLKumV32GIeLbccn5IaY5" />
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
@@ -116,16 +131,35 @@
     </configuration>
     <configuration name="datasetVer1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="YAI_RL" />
+=======
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "WebServerToolWindowFactoryState": "true",
+    "settings.editor.selected.configurable": "configurable.group.build"
+  }
+}]]></component>
+  <component name="RunManager" selected="Python.datasetVer1">
+    <configuration name="datasetVer1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
+<<<<<<< HEAD
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+=======
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/py4pl/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets/datasetVer1.py" />
       <option name="PARAMETERS" value="" />
@@ -136,13 +170,18 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+<<<<<<< HEAD
     <configuration name="getReward" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="YAI_RL" />
+=======
+    <configuration name="splitData" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
+<<<<<<< HEAD
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -172,6 +211,16 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+=======
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/py4pl/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util/splitData.py" />
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -182,15 +231,22 @@
     </configuration>
     <recent_temporary>
       <list>
+<<<<<<< HEAD
         <item itemvalue="Python.SAC_Buffer" />
         <item itemvalue="Python.SAC_Agent" />
         <item itemvalue="Python.getReward" />
         <item itemvalue="Python.SAC_doEpisode" />
         <item itemvalue="Python.datasetVer1" />
+=======
+        <item itemvalue="Python.datasetVer1" />
+        <item itemvalue="Python.prac2" />
+        <item itemvalue="Python.splitData" />
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
       </list>
     </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+<<<<<<< HEAD
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="f6a96a96-87c8-4c4c-bc93-b75e36280709" name="Changes" comment="" />
@@ -220,11 +276,26 @@
       <updated>1654488980639</updated>
     </task>
     <option name="localTasksCounter" value="2" />
+=======
+  <component name="SvnConfiguration">
+    <configuration>$USER_HOME$/.subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="69e47fba-9d4e-4851-9fde-ffc79ffcd8ae" name="Changes" comment="" />
+      <created>1654852724786</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1654852724786</updated>
+      <workItem from="1654852726442" duration="4832000" />
+    </task>
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+<<<<<<< HEAD
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
@@ -260,5 +331,11 @@
     <SUITE FILE_PATH="coverage/YAI_RL$splitData.coverage" NAME="splitData Coverage Results" MODIFIED="1654842505805" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util" />
     <SUITE FILE_PATH="coverage/YAI_RL$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1654831331233" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL" />
     <SUITE FILE_PATH="coverage/YAI_RL$SAC_doEpisode.coverage" NAME="SAC_doEpisode Coverage Results" MODIFIED="1655790589452" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL" />
+=======
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/YAI_RL$prac2.coverage" NAME="prac2 Coverage Results" MODIFIED="1654857521399" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL" />
+    <SUITE FILE_PATH="coverage/YAI_RL$datasetVer1.coverage" NAME="datasetVer1 Coverage Results" MODIFIED="1654857754839" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/datasets" />
+    <SUITE FILE_PATH="coverage/YAI_RL$splitData.coverage" NAME="splitData Coverage Results" MODIFIED="1654854460075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/YAI_TimeSeriesAnomalyDetectionwithRL/util" />
+>>>>>>> a405cea485f9edd1df845971da4d08f04c2de7a6
   </component>
 </project>

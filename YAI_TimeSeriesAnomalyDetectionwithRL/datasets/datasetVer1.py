@@ -71,7 +71,6 @@ class datasetVer1(Dataset):
         # because label is on the column 2
         label = dataInScope[-1,2]
 
-
         return inputData,label
 
     # change csv file to use different file
@@ -84,8 +83,9 @@ class datasetVer1(Dataset):
         with open(self.dataFolderDir+self.pickedFolder,'r') as f:
             rdr = csv.reader(f)
             self.dataArr = np.asarray(list(rdr)[1:]).astype(float)
-
         self.dataArr = torch.from_numpy(self.dataArr)
+
+
 
 
 

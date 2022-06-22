@@ -13,7 +13,7 @@ def mk_name(*args,**name_value_dict):
         value = name_value[1]
         total_name += (str(name)+str(value)+'_')
 
-    total_name += additional_arg[:-1]
+    total_name += additional_arg
 
     return total_name
 
@@ -24,3 +24,4 @@ def createDirectory(directory):
             print(f'making {str(directory)} complete successfully!')
     except OSError:
         print("Error: Failed to create the directory.")
+

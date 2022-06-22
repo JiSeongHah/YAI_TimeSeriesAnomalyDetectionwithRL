@@ -35,7 +35,6 @@ def splitData(dataDir,splitRatio,randomPick=True):
 
 if __name__ == '__main__':
 
-    dataDir = '/home/a286winteriscoming/Downloads/TimeSeriesAnomalyDataset/Yahoo/' \
-              'Yahoo/ydata-labeled-time-series-anomalies-v1_0/A1Benchmark/'
+    dataDir = '/home/emeraldsword1423/Downloads/Yahoo/ydata-labeled-time-series-anomalies-v1_0/A1Benchmark/'
 
     splitData(dataDir=dataDir,splitRatio=0.8)

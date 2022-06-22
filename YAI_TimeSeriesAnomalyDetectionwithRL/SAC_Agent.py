@@ -8,10 +8,12 @@ from torch.optim import Adam
 from UTILS import disable_gradients
 import datasets.datasetVer1 as theDataset
 from torch.utils.data import DataLoader
-
+import matplotlib.pyplot as plt
+from util.usefulFuncs import createDirectory
 
 class Agent():
     def __init__(self,
+                 plotSaveDir,
                  input_dims=[8],
                  gpuUse= True,
                  lr=3e-4,
@@ -23,6 +25,8 @@ class Agent():
                  batch_size=256,
                  reward_scale=2):
 
+        self.plotSaveDir = plotSaveDir
+        createDirectory(self.plotSaveDir)
         self.gamma = gamma
         self.tau = tau
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
@@ -30,16 +34,15 @@ class Agent():
         self.n_actions = n_actions
         self.gpuUse = gpuUse
         self.scale = reward_scale
-        self.update_network_parameters(tau=1)
+
         self.targetEntropyRatio = targetEntropyRatio
 
-
-        self.actor = ActorNetwork(input_dims,
+        self.actor = ActorNetwork(input_dims[0],
                                   n_actions=n_actions,
                                   name='actor'
                                   )
 
-        self.onlineCritic = TwinnedQNetwork(input_dims=input_dims,
+        self.onlineCritic = TwinnedQNetwork(input_dims=input_dims[0],
                                             num_actions=n_actions,
                                             gpuUse=True,
                                             shared=False,
@@ -47,7 +50,7 @@ class Agent():
                                             chkpt_dir='tmp/sac'
                                             )
 
-        self.targetCritic = TwinnedQNetwork(input_dims=input_dims,
+        self.targetCritic = TwinnedQNetwork(input_dims=input_dims[0],
                                             num_actions=n_actions,
                                             gpuUse=True,
                                             shared=False,
@@ -77,9 +80,24 @@ class Agent():
         self.targetEntropy = -np.log(1.0 / self.n_actions)*self.targetEntropyRatio
 
         # We optimize log(alpha), instead of alpha.
-        self.logAlpha = torch.zeros(1, requires_grad=True, device=self.device)
+        self.logAlpha = torch.zeros(1, requires_grad=True, device='cpu')
         self.alpha = self.logAlpha.exp()
         self.alpha_optim = Adam([self.logAlpha], lr=lr)
+
+        self.q1LossLst = []
+        self.q2LossLst = []
+        self.policyLossLst = []
+        self.alphaLossLst = []
+
+        self.q1LossLstAvg = []
+        self.q2LossLstAVg = []
+        self.policyLossLstAvg = []
+        self.alphaLossLstAvg = []
+
+        # self.actor.to(self.device)
+        # self.onlineCritic.to(self.device)
+        # self.targetCritic.to(self.device)
+        # self.alpha.to(self.device)
 
     def explore(self, state):
         # Act with randomness. when training
@@ -103,21 +121,6 @@ class Agent():
 
         self.memory.store_transition(state, action, reward, new_state, done)
 
-    def update_network_parameters(self, tau=None):
-        if tau is None:
-            tau = self.tau
-
-        target_value_params = self.target_value.named_parameters()
-        value_params = self.value.named_parameters()
-
-        target_value_state_dict = dict(target_value_params)
-        value_state_dict = dict(value_params)
-
-        for name in value_state_dict:
-            value_state_dict[name] = tau * value_state_dict[name].clone() + \
-                                     (1 - tau) * target_value_state_dict[name].clone()
-
-        self.target_value.load_state_dict(value_state_dict)
 
     def save_models(self):
         print('.... saving models ....')
@@ -138,7 +141,7 @@ class Agent():
     def updateTarget(self):
         self.targetCritic.load_state_dict(self.onlineCritic.state_dict())
 
-    def calcCurrentQ(self,states,actions,rewards,nextStates,donees):
+    def calcCurrentQ(self,states,actions,rewards,nextStates,dones):
 
         currQ1, currQ2 = self.onlineCritic(states)
 
@@ -149,19 +152,29 @@ class Agent():
 
     def calcTargetQ(self,states,actions,rewards,nextStates,dones):
 
-        with torch.set_grad_enabled(False):
-            _,actionProbs,logActionProbs = self.actor.sample(nextStates)
 
+        with torch.no_grad():
+            _,actionProbs,logActionProbs = self.actor.sample(nextStates)
             nextQ1,nextQ2 = self.targetCritic(nextStates)
+            # print('Q1 size',nextQ1.size())
+            # print('Q1 type',nextQ1.type())
+            # print('alpha size,',self.alpha.size())
+            # print('alpha type,', self.alpha.type())
+            # print('logAction size',logActionProbs.size())
+            # print('logAction type ',logActionProbs.type())
 
             nextQ = (actionProbs *(
                 torch.min(nextQ1,nextQ2) - self.alpha * logActionProbs
-            )).sum(dim=1,keepDim=True)
+            )).sum(dim=1,keepdim=True)
 
+        # print(2222222222222222222,nextQ.size())
+        # print(dones.size())
+        # print(dones)
+        # print(3333333333333333333333,rewards.size())
         assert rewards.shape == nextQ.shape
-        return rewards + (1.0- dones)* self.gamma * nextQ
+        return rewards + (1.0- dones*1)* self.gamma * nextQ
 
-    def calcCriticLoss(self,batch,weights):
+    def calcCriticLoss(self,batch):
 
         currQ1,currQ2 = self.calcCurrentQ(*batch)
         targetQ = self.calcTargetQ(*batch)
@@ -171,12 +184,12 @@ class Agent():
         meanQ1= currQ1.detach().mean().item()
         meanQ2 = currQ2.detach().mean().item()
 
-        lossQ1 = torch.mean( (currQ1-targetQ) ).pow(2) * weights
-        lossQ2 = torch.mean( (currQ2-targetQ) ).pow(2) * weights
+        lossQ1 = torch.mean( (currQ1-targetQ) ).pow(2)
+        lossQ2 = torch.mean( (currQ2-targetQ) ).pow(2)
 
         return lossQ1, lossQ2, errors, meanQ1, meanQ2
 
-    def calcPolicyLoss(self,states,actions,rewards,nextStates,dones,weights):
+    def calcPolicyLoss(self,states,actions,rewards,nextStates,dones):
 
         _,actionProbs,logActionProbs = self.actor.sample(states)
 
@@ -189,78 +202,117 @@ class Agent():
 
         Q = torch.sum(torch.min(Q1,Q2)*actionProbs,dim=1,keepdim=True)
 
-        policyLoss = (weights*(-Q - self.alpha * entropies)).mean()
+        policyLoss = ((-Q - self.alpha * entropies)).mean()
 
         return policyLoss, entropies.detach()
 
-    def calcEntropyLoss(self,entropies,weights):
+    def calcEntropyLoss(self,entropies):
 
         assert not entropies.requires_grad
 
-        entropyLoss = -torch.mean(self.logAlpha*(self.targetEntropy-entropies)*weights)
+        entropyLoss = -torch.mean(self.logAlpha*(self.targetEntropy-entropies))
 
         return entropyLoss
 
 
     def learn(self):
+
         if self.memory.mem_cntr < self.batch_size:
             return
 
-        state, action, reward, new_state, done = \
-            self.memory.sample_buffer(self.batch_size)
+        # self.actor.to(self.device)
+        # self.onlineCritic.to(self.device)
+        # self.targetCritic.to(self.device)
+        # self.alpha.to(self.device)
+        #
+        # self.onlineCritic.to('cpu')
+        # self.actor.to('cpu')
+        # self.alpha.to('cpu')
+        # # self.targetCritic.to('cpu')
+        #
+        # print('a is in',self.onlineCritic.device)
+        # print('b is in', self.actor.device)
+        # print('c is in', self.alpha.device)
+        # print('d is in ',self.targetCritic.device)
 
         BATCH = self.memory.sample_buffer(self.batch_size)
 
-        reward = torch.tensor(reward, dtype=torch.float).to(self.actor.device)
-        done = torch.tensor(done).to(self.actor.device)
-        state_ = torch.tensor(new_state, dtype=torch.float).to(self.actor.device)
-        state = torch.tensor(state, dtype=torch.float).to(self.actor.device)
-        action = torch.tensor(action, dtype=torch.float).to(self.actor.device)
+        q1_loss, q2_loss, errors, mean_q1, mean_q2 = \
+            self.calcCriticLoss(BATCH)
+        policy_loss, entropies = self.calcPolicyLoss(*BATCH)
+        entropy_loss = self.calcEntropyLoss(entropies)
 
-        value = self.value(state).view(-1)
-        value_ = self.target_value(state_).view(-1)
-        value_[done] = 0.0
+        self.updateParams(optim=self.q1_optim,loss=q1_loss)
+        self.updateParams(optim=self.q2_optim, loss=q2_loss)
+        self.updateParams(optim=self.policy_optim,loss=policy_loss)
+        self.updateParams(optim=self.alpha_optim,loss=entropy_loss)
 
-        actions, log_probs = self.actor.sample_normal(state, reparameterize=False)
-        log_probs = log_probs.view(-1)
-        q1_new_policy = self.critic_1.forward(state, actions)
-        q2_new_policy = self.critic_2.forward(state, actions)
-        critic_value = torch.min(q1_new_policy, q2_new_policy)
-        critic_value = critic_value.view(-1)
+        self.alpha = self.logAlpha.exp()
 
-        self.value.optimizer.zero_grad()
-        value_target = critic_value - log_probs
-        value_loss = 0.5 * F.mse_loss(value, value_target)
-        value_loss.backward(retain_graph=True)
-        self.value.optimizer.step()
+        # self.onlineCritic.to(self.device)
+        # self.actor.to(self.device)
+        # self.alpha.to(self.device)
+        # self.targetCritic.to(self.device)
 
-        actions, log_probs = self.actor.sample_normal(state, reparameterize=True)
-        log_probs = log_probs.view(-1)
-        q1_new_policy = self.critic_1.forward(state, actions)
-        q2_new_policy = self.critic_2.forward(state, actions)
-        critic_value = torch.min(q1_new_policy, q2_new_policy)
-        critic_value = critic_value.view(-1)
+        self.q1LossLst.append(q1_loss.detach().item())
+        self.q2LossLst.append(q2_loss.detach().item())
+        self.policyLossLst.append(policy_loss.detach().item())
+        self.alphaLossLst.append(entropy_loss.detach().item())
 
-        actor_loss = log_probs - critic_value
-        actor_loss = torch.mean(actor_loss)
-        self.actor.optimizer.zero_grad()
-        actor_loss.backward(retain_graph=True)
-        self.actor.optimizer.step()
+    def flushLst(self):
 
-        self.critic_1.optimizer.zero_grad()
-        self.critic_2.optimizer.zero_grad()
-        q_hat = self.scale * reward + self.gamma * value_
-        q1_old_policy = self.critic_1.forward(state, action).view(-1)
-        q2_old_policy = self.critic_2.forward(state, action).view(-1)
-        critic_1_loss = 0.5 * F.mse_loss(q1_old_policy, q_hat)
-        critic_2_loss = 0.5 * F.mse_loss(q2_old_policy, q_hat)
+        self.q1LossLst.clear()
+        self.q2LossLst.clear()
+        self.policyLossLst.clear()
+        self.alphaLossLst.clear()
 
-        critic_loss = critic_1_loss + critic_2_loss
-        critic_loss.backward()
-        self.critic_1.optimizer.step()
-        self.critic_2.optimizer.step()
+        print('flushing lst complete')
 
-        self.update_network_parameters()
+    def plotAvgLosses(self):
+
+        self.q1LossLstAvg.append(np.mean(self.q1LossLst))
+        self.q2LossLstAVg.append(np.mean(self.q2LossLst))
+        self.policyLossLstAvg.append(np.mean(self.policyLossLst))
+        self.alphaLossLstAvg.append(np.mean(self.alphaLossLst))
+
+        fig = plt.figure(constrained_layout= True)
+        ax1 = fig.add_subplot(2, 2, 1)
+        ax1.plot(range(len(self.q1LossLstAvg)), self.q1LossLstAvg)
+        ax1.set_xlabel('iteration')
+        ax1.set_ylabel('Loss')
+        ax1.set_title('Q1 Loss')
+
+        ax2 = fig.add_subplot(2, 2, 2)
+        ax2.plot(range(len(self.q2LossLstAVg)), self.q2LossLstAVg)
+        ax2.set_xlabel('iteration')
+        ax2.set_ylabel('Loss')
+        ax2.set_title('Q2 Loss')
+
+        ax3 = fig.add_subplot(2, 2, 3)
+        ax3.plot(range(len(self.policyLossLstAvg)), self.policyLossLstAvg)
+        ax3.set_xlabel('iteration')
+        ax3.set_ylabel('Loss')
+        ax3.set_title('Policy Loss')
+
+        ax4 = fig.add_subplot(2, 2, 4)
+        ax4.plot(range(len(self.alphaLossLstAvg)), self.alphaLossLstAvg)
+        ax4.set_xlabel('iteration')
+        ax4.set_ylabel('Loss')
+        ax4.set_title('Alpha Loss')
+
+        plt.savefig(self.plotSaveDir+'trainingLossResult.png', dpi=200)
+        print('saving plot complete!')
+        plt.close()
+        plt.cla()
+        plt.clf()
+
+        self.flushLst()
+
+    def updateParams(self,optim,loss):
+
+        optim.zero_grad()
+        loss.backward()
+        optim.step()
 
 
 

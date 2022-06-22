@@ -1,14 +1,14 @@
+import torch
 import numpy as np
-
 class ReplayBuffer():
     def __init__(self, max_size, input_shape, n_actions):
         self.mem_size = max_size
         self.mem_cntr = 0
-        self.state_memory = np.zeros((self.mem_size, *input_shape))
-        self.new_state_memory = np.zeros((self.mem_size, *input_shape))
-        self.action_memory = np.zeros((self.mem_size, n_actions))
-        self.reward_memory = np.zeros(self.mem_size)
-        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
+        self.state_memory = torch.zeros((self.mem_size, *input_shape))
+        self.new_state_memory = torch.zeros((self.mem_size, *input_shape))
+        self.action_memory = torch.zeros((self.mem_size, n_actions))
+        self.reward_memory = torch.zeros(self.mem_size)
+        self.terminal_memory = torch.zeros(self.mem_size, dtype=torch.bool)
 
     def store_transition(self, state, action, reward, state_, done):
         index = self.mem_cntr % self.mem_size
@@ -32,11 +32,12 @@ class ReplayBuffer():
         rewards = self.reward_memory[batch]
         dones = self.terminal_memory[batch]
 
-        BATCH = states, actions, rewards, states_, dones
+
+        BATCH = states, actions, rewards.unsqueeze(1), states_, dones.unsqueeze(1)
 
         return BATCH
 
 
-buffur = ReplayBuffer(np.array([3]),5,7)
-
-print(buffur.mem_cntr % buffur.mem_size)
+# buffur = ReplayBuffer(np.array([3]),5,7)
+#
+# print(buffur.mem_cntr % buffur.mem_size)
