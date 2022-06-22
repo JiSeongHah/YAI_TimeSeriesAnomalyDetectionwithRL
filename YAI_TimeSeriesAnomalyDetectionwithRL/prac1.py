@@ -1,7 +1,8 @@
-import torch
+import numpy as np
 
-x = torch.randint(0,3,(3,2))
+x = []
 
-y = x> 0.5
-print(y)
-print(y*1)
+x.append(0/0)
+
+if np.isnan(x[0]) == True:
+    print('yes')

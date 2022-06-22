@@ -7,16 +7,16 @@ def getReward(action,label,rewardDict):
 
     #case 0 : True Positive
     if action == label and label== 1:
-        return rewardDict['TP']
+        return [rewardDict['TP'] ,'TP']
 
     elif action != label and label == 1:
-        return rewardDict['FN']
+        return [rewardDict['FN'] , 'FN']
 
     elif action != label and label == 0:
-        return rewardDict['FP']
+        return [rewardDict['FP'] , 'FP']
 
     else:
-        return rewardDict['TN']
+        return [rewardDict['TN'] , 'TN ']
 
 #
 # rewardDict= {
