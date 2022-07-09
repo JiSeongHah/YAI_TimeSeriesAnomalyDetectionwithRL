@@ -1,5 +1,5 @@
 import torch
-from datasets.datasetVer1 import datasetVer1 as theDataset
+from datasets.datasetVer2 import datasetVer2 as theDataset
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from SAC_Agent import Agent
@@ -47,7 +47,7 @@ class MainLoop():
                                          windowSize=self.windowSize[0],
                                          scalingMethod=self.scalingMethod)
 
-        self.validationLoader = iter(DataLoader(self.episodeDataset,
+        self.validationLoader = iter(DataLoader(self.validationDataset,
                                         batch_size=1,
                                         shuffle=False,
                                         num_workers=1))
@@ -160,11 +160,21 @@ class MainLoop():
 
         state,label = self.gymLikeReset()
 
-        for idx in range(len(self.episodeLoader)-1):
+        # print(f'len of episodeloader is : {len(self.episodeLoader)}')
+        # print(f'state is : {state}')
 
+        if torch.sum(torch.isnan(state.clone().detach()).float()):
+            print(f'state is nan for dir : {self.episodeDataset.pickedFolder} with idx : 0')
+
+
+        for idx in range(len(self.episodeLoader)-1):
 
             action = self.Agent.explore(state)
             nextState, nextLabel, reward, done = self.gymLikeStep(action=action,label=label,idx=idx)
+
+            if torch.sum(torch.isnan(nextState.clone().detach()).float()):
+                print(f'state is nan for dir : {self.episodeDataset.pickedFolder} with idx : {idx}'
+                      f'and  states is {nextState}')
 
             if reward[1] == 'TP':
                 self.TPLstTrn.append(1)
@@ -175,7 +185,8 @@ class MainLoop():
             else:
                 self.TNLstTrn.append(1)
 
-
+            # print(f'state is :{state.size()} with path : {self.episodeDataset.pickedFolder} wit idx :{idx}')
+            # print(f'nextState is :{nextState.size()}')
             self.Agent.remember(state=state,
                                 action=action,
                                 reward=reward[0],
@@ -193,6 +204,10 @@ class MainLoop():
 
 
     def validateOneEpisode(self):
+        print('start validating ...')
+        print('start validating ...')
+        print('start validating ...')
+        print('start validating ...')
 
         state, label = self.gymLikeResetVal()
 
@@ -217,10 +232,10 @@ class MainLoop():
 
         ######### Calculate f1 beta score of training one episode ###################################
 
-        print(1,np.sum(self.TPLstTrn))
-        print(2,np.sum(self.FPLstTrn))
-        print(3,np.sum(self.FNLstTrn))
-        print(33,np.sum(self.TNLstTrn))
+        # print(1,np.sum(self.TPLstTrn))
+        # print(2,np.sum(self.FPLstTrn))
+        # print(3,np.sum(self.FNLstTrn))
+        # print(33,np.sum(self.TNLstTrn))
 
         if (np.sum(self.TPLstTrn) + np.sum(self.FPLstTrn) ) ==0:
             self.precisionTrn.append(0)
@@ -232,7 +247,7 @@ class MainLoop():
         else:
             self.RecallTrn.append(np.sum(self.TPLstTrn) / (np.sum(self.TPLstTrn) + np.sum(self.FNLstTrn) + 1e-9))
 
-        print(self.precisionTrn[-1],self.RecallTrn[-1])
+        # print(self.precisionTrn[-1],self.RecallTrn[-1])
 
         if (self.precisionTrn[-1] * self.RecallTrn[-1] == 0):
             latestF1BetaScore = 0
@@ -244,11 +259,11 @@ class MainLoop():
 
 
         ######### Calculate f1 beta score of validation one episode ###################################
-        print(77,len(self.validationLoader))
-        print(4,np.sum(self.TPLstVal))
-        print(5,np.sum(self.FPLstVal))
-        print(6,np.sum(self.FNLstVal))
-        print(7,np.sum(self.TNLstVal))
+        # print(77,len(self.validationLoader))
+        # print(4,np.sum(self.TPLstVal))
+        # print(5,np.sum(self.FPLstVal))
+        # print(6,np.sum(self.FNLstVal))
+        # print(7,np.sum(self.TNLstVal))
 
         if ( np.sum(self.TPLstVal) + np.sum(self.FPLstVal) ) == 0:
             self.precisionVal.append(0)
@@ -260,7 +275,7 @@ class MainLoop():
         else:
             self.RecallVal.append(np.sum(self.TPLstVal) / (np.sum(self.TPLstVal) + np.sum(self.FNLstVal) + 1e-9))
 
-        print(self.precisionVal[-1], self.RecallVal[-1])
+        # print(self.precisionVal[-1], self.RecallVal[-1])
 
         if (self.precisionVal[-1] * self.RecallVal[-1]) == 0:
             latestF1BetaScore = 0
@@ -302,6 +317,14 @@ class MainLoop():
         ax6.set_title('f1 beta score Val')
 
         plt.savefig(self.baseDir+'scoreResult.png',dpi=200)
+        print(f'episode complete with TP : {np.sum(self.TPLstVal)}, FN : {np.sum(self.FNLstVal)}'
+              f', FP : {np.sum(self.FPLstVal)} , TN : {np.sum(self.TNLstVal)}')
+        plt.close()
+        plt.cla()
+        plt.clf()
+
+        print(f'episode complete with f1 score : {latestF1BetaScore} ,'
+              f' from precision : {self.precisionVal[-1]} and recall : {self.RecallVal[-1]} for beta :{self.beta}')
 
 
         self.flushLst()
@@ -333,24 +356,9 @@ loop = MainLoop(baseDir=dir,
                 updateTargetNetTerm=1000,
                 scalingMethod='minMax')
 
-do = loop.StartTrnAndVal(3)
+do = loop.StartTrnAndVal(100)
 
 
-
-lst = []
-
-for idx ,i in enumerate(range(1,5)):
-
-    if idx !=0:
-        lst.append([state,done,action,reward,])
-
-    state = str(i)
-
-    done = False
-
-    action = i
-
-    reward = -i*i
 
 
 

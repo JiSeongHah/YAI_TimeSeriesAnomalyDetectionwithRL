@@ -153,9 +153,9 @@ class ActorNetwork(nn.Module):
     def forward(self, state):
         state = state.float()
         prob = self.fc1(state)
-        prob = F.relu(prob)
+        prob = F.sigmoid(prob)
         prob = self.fc2(prob)
-        prob = F.relu(prob)
+        prob = F.sigmoid(prob)
         actionProb = self.fc3(prob)
 
         return actionProb
@@ -169,6 +169,9 @@ class ActorNetwork(nn.Module):
     def sample(self, state):
         # do action by probs which proportional to actionProb
         actionProbs = F.softmax(self.forward(state),dim=1)
+        # if torch.sum(torch.isnan(actionProbs.clone().detach()).float()) >=1:
+        #     print('state is ',state)
+        #     print('action is ',actionProbs)
         actionDist = Categorical(actionProbs)
         actions = actionDist.sample().view(-1,1)
 
