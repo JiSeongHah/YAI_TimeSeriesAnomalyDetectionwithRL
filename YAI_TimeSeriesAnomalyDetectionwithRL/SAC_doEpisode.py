@@ -5,14 +5,16 @@ import torch.nn as nn
 from SAC_Agent import Agent
 from util.getReward import getReward
 from util.rewardDict import rewardDict
+from util.usefulFuncs import mk_name,createDirectory
 import numpy as np
 import matplotlib.pyplot as plt
-
+import pickle
 
 class MainLoop():
 
     def __init__(self,
                  baseDir,
+                 resultSaveDir,
                  windowSize,
                  beta,
                  gpuUse,
@@ -23,6 +25,7 @@ class MainLoop():
         super(MainLoop, self).__init__()
 
         self.baseDir = baseDir
+        self.resultSaveDir = resultSaveDir
         self.windowSize = windowSize
         self.beta = beta
         self.scalingMethod = scalingMethod
@@ -316,7 +319,7 @@ class MainLoop():
         ax6.set_xlabel('episode')
         ax6.set_title('f1 beta score Val')
 
-        plt.savefig(self.baseDir+'scoreResult.png',dpi=200)
+        plt.savefig(self.resultSaveDir+'scoreResult.png',dpi=200)
         print(f'episode complete with TP : {np.sum(self.TPLstVal)}, FN : {np.sum(self.FNLstVal)}'
               f', FP : {np.sum(self.FPLstVal)} , TN : {np.sum(self.TNLstVal)}')
         plt.close()
@@ -326,6 +329,8 @@ class MainLoop():
         print(f'episode complete with f1 score : {latestF1BetaScore} ,'
               f' from precision : {self.precisionVal[-1]} and recall : {self.RecallVal[-1]} for beta :{self.beta}')
 
+        with open(self.resultSaveDir+'scoreLst.pkl','wb') as F:
+            pickle.dump(self.f1BetaScoreVal,F)
 
         self.flushLst()
 
@@ -345,18 +350,32 @@ class MainLoop():
 dir ='/home/a286winteriscoming/Downloads/TimeSeriesAnomalyDataset/Yahoo/' \
      'Yahoo/ydata-labeled-time-series-anomalies-v1_0/A1Benchmark/'
 
+scalingMethodLst = ['minMax','zScore']
+doShuffle = [True,False]
+wSizeLst = [10*i for i in range(1,100)]
+updateTargetTermLst = [2**(i+1) for i in range(10)]
 
 
-loop = MainLoop(baseDir=dir,
-                windowSize=[17],
-                batchSize=256,
-                beta=1,
-                gpuUse=True,
-                doEpiShuffle=True,
-                updateTargetNetTerm=1000,
-                scalingMethod='minMax')
+for scalingMethod in scalingMethodLst:
+    for SHUFFLE in doShuffle:
+        for updateTargetTerm in updateTargetTermLst:
+            for wSize in wSizeLst:
 
-do = loop.StartTrnAndVal(100)
+                resultSaveDir = dir + mk_name(shuffle=SHUFFLE,
+                                              wSize=wSize,
+                                              updateTerm=updateTargetTerm)
+
+                loop = MainLoop(baseDir=dir,
+                                resultSaveDir=resultSaveDir,
+                                windowSize=[wSize],
+                                batchSize=256,
+                                beta=1,
+                                gpuUse=True,
+                                doEpiShuffle=SHUFFLE,
+                                updateTargetNetTerm=updateTargetTerm,
+                                scalingMethod=scalingMethod)
+
+                do = loop.StartTrnAndVal(10000)
 
 
 

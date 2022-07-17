@@ -69,8 +69,8 @@ class datasetVer2(Dataset):
         inputData = self.inputArr[idx:idx+self.windowSize]
         labels = self.labelArr[idx:idx+self.windowSize]
 
-        if len(labels) != 17:
-            print(f'size is :{labels.size()}, folder is : {self.pickedFolder}, idx : {idx}')
+        # if len(labels) != 17:
+        #     print(f'size is :{labels.size()}, folder is : {self.pickedFolder}, idx : {idx}')
         # print(f'labels is : {labels.size()} with len : {len(labels)} with folder : {self.pickedFolder} and idx :{idx}')
         # because input data is on column 1
         # print(f'staet bef is : {inputData} with dir : {self.pickedFolder}')
