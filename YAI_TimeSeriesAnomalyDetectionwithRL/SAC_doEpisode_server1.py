@@ -9,6 +9,8 @@ from util.usefulFuncs import mk_name,createDirectory
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
+import os
+
 
 class MainLoop():
 
@@ -346,37 +348,41 @@ class MainLoop():
 
 
 
+os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
-dir ='/home/a286winteriscoming/Downloads/TimeSeriesAnomalyDataset/Yahoo/' \
+dir ='/home/a286/hjs_dir1/myYAI_RL0/TimeSeriesAnomalyDataset/Yahoo/' \
      'Yahoo/ydata-labeled-time-series-anomalies-v1_0/A1Benchmark/'
 
 scalingMethodLst = ['minMax','zScore']
 doShuffle = [True,False]
+
+scalingMethod = scalingMethodLst[0]
+SHUFFLE = doShuffle[1]
+
+
 wSizeLst = [10*i for i in range(1,30)]
 updateTargetTermLst = [2**(i+1) for i in range(4,10)]
 
 
-for scalingMethod in scalingMethodLst:
-    for SHUFFLE in doShuffle:
-        for updateTargetTerm in updateTargetTermLst:
-            for wSize in wSizeLst:
+for updateTargetTerm in updateTargetTermLst:
+    for wSize in wSizeLst:
 
-                resultSaveDir = dir + mk_name(shuffle=SHUFFLE,
-                                              wSize=wSize,
-                                              updateTerm=updateTargetTerm) + '/'
-                createDirectory(resultSaveDir)
+        resultSaveDir = dir + mk_name(shuffle=SHUFFLE,
+                                      wSize=wSize,
+                                      updateTerm=updateTargetTerm) + '/'
+        createDirectory(resultSaveDir)
 
-                loop = MainLoop(baseDir=dir,
-                                resultSaveDir=resultSaveDir,
-                                windowSize=[wSize],
-                                batchSize=256,
-                                beta=1,
-                                gpuUse=True,
-                                doEpiShuffle=SHUFFLE,
-                                updateTargetNetTerm=updateTargetTerm,
-                                scalingMethod=scalingMethod)
+        loop = MainLoop(baseDir=dir,
+                        resultSaveDir=resultSaveDir,
+                        windowSize=[wSize],
+                        batchSize=256,
+                        beta=1,
+                        gpuUse=True,
+                        doEpiShuffle=SHUFFLE,
+                        updateTargetNetTerm=updateTargetTerm,
+                        scalingMethod=scalingMethod)
 
-                do = loop.StartTrnAndVal(5000)
+        do = loop.StartTrnAndVal(10000)
 
 
 
