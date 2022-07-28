@@ -369,6 +369,7 @@ for updateTargetTerm in updateTargetTermLst:
 
         resultSaveDir = dir + mk_name(shuffle=SHUFFLE,
                                       wSize=wSize,
+                                      scalingMethod=scalingMethod,
                                       updateTerm=updateTargetTerm) + '/'
         createDirectory(resultSaveDir)
 
@@ -382,7 +383,7 @@ for updateTargetTerm in updateTargetTermLst:
                         updateTargetNetTerm=updateTargetTerm,
                         scalingMethod=scalingMethod)
 
-        do = loop.StartTrnAndVal(10000)
+        do = loop.StartTrnAndVal(3000)
 
 
 
