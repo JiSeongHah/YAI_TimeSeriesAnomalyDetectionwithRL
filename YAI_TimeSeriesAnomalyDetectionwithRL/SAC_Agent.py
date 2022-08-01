@@ -261,19 +261,19 @@ class Agent():
 
     def flushLst(self):
 
+        self.q1LossLstAvg.append(np.mean(self.q1LossLst))
+        self.q2LossLstAVg.append(np.mean(self.q2LossLst))
+        self.policyLossLstAvg.append(np.mean(self.policyLossLst))
+        self.alphaLossLstAvg.append(np.mean(self.alphaLossLst))
+
         self.q1LossLst.clear()
         self.q2LossLst.clear()
         self.policyLossLst.clear()
         self.alphaLossLst.clear()
 
-        print('flushing lst complete')
+        # print('flushing lst complete')
 
     def plotAvgLosses(self):
-
-        self.q1LossLstAvg.append(np.mean(self.q1LossLst))
-        self.q2LossLstAVg.append(np.mean(self.q2LossLst))
-        self.policyLossLstAvg.append(np.mean(self.policyLossLst))
-        self.alphaLossLstAvg.append(np.mean(self.alphaLossLst))
 
         fig = plt.figure(constrained_layout= True)
         ax1 = fig.add_subplot(2, 2, 1)
