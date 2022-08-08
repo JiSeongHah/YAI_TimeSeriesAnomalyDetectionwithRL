@@ -8,20 +8,17 @@ from torch.distributions import Categorical
 from config import get_parse
 from dataload import get_nth_data, main_data
 import numpy as np
-from sklearn.metrics import fbeta_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
-from sklearn.metrics import confusion_matrix
 
 #Hyperparameters
-learning_rate = 0.001 #3e-4 #0.0005
-gamma         = 0.99
+learning_rate = 0.0005
+gamma         = 0.98
 lmbda         = 0.95
-eps_clip      = 0.15 #0.1
+eps_clip      = 0.1
 K_epoch       = 3
-#T_horizon     = 20  ## 몇 time step 동안 data 모을지
-beta_val      = 1   #10**(-1)
-rewards       = [0, 0, 0, 0]
+T_horizon     = 20  ## 몇 time step 동안 data 모을지
+beta          = 10**(-5)
 class PPO(nn.Module):
     def __init__(self):
         super(PPO, self).__init__()
@@ -98,34 +95,25 @@ class PPO(nn.Module):
             loss.mean().backward()
             self.optimizer.step()
         
-def reward(true, pred): #TN, FP \ FN, TP
-    TP = 2.001 #0.6 #-0.05 #0.156
-    TN = -1.003 #0.3 #0.002
-    FP = -1.2 #-0.21 #-0.0001
-    FN = 1.1 #-0.31 #-1.05
-    # 10, 1, -10, -3 & beta = 10e-1-> 나쁘지 않음
-    # 20, -10, -15, 1 & beta = 1-> 2개만 나옴
-    # 17, -10, -15, 2 & beta = 1-> 값 작게 나옴
-    # 15, -8, -10, 2 & beta = 1-> 값 작게 나옴
-    # 0.9, 0.01, -0.001, -0.3 & beta = 1 -> 값 작게 나옴
-    if(true == 1 and pred == 1):
+def reward(pred, true):
+    TP = 3
+    TN = 1
+    FP = 2
+    FN = -1
+    if(pred == 1 and true == 1):
         return TP
-    elif (true == 1 and pred == 0):
-        return FN
-    elif (true == 0 and pred == 1):
-        return FP
-    elif (true == 0 and pred == 0):
+    elif (pred == 1 and true == 0):
         return TN
+    elif (pred == 0 and true == 1):
+        return FP
+    elif (pred == 0 and true == 0):
+        return FN
 
-#def rewards(true, pred):
-def cal_fbetascore(y_true, y_pred, beta):
+def cal_fbetascore(y_pred, y_true, beta):
     precision = precision_score(y_true, y_pred)
     recall = recall_score(y_true, y_pred)
-    if((beta**2 * precision + recall) == 0):
-        fsc = 0
-    else:
-        fsc = ((1 + beta**2) * precision * recall) / (beta**2 * precision + recall)
-    return precision, recall, fsc
+    fsc = ((1 + beta**2) * precision * recall) / (beta**2 * precision + recall)
+    return fsc
 
 def main_ppo(): # 빠른 버전
     ######################## make environment ########################
@@ -134,7 +122,6 @@ def main_ppo(): # 빠른 버전
     model = PPO()
     score = 0.0
     num_epi = len(train.timestamp)
-    #model.train_net()
     ##################################################################
     print('-'*80)
     for n_epi in range(num_epi): #10000
@@ -160,13 +147,18 @@ def main_ppo(): # 빠른 버전
                 #true_arr = np.append(true_arr, label_arr[t])
                 pred_lst.append(a)
                 true_lst.append(label_arr[t])
-                
+                #print(r)
+                if(r==None):
+                    print(label_arr[t])
+                    print(a)
+                    print(reward(label_arr[t], a))
+                    print(r)
                 if t == len(time_arr)-2:
                     done = True
                 else:
                     done = False
 
-                model.put_data((s, a, r/100, s_prime, prob[a].item(), done)) ## prob[a].item() : action에 대한 확률값 -> ratio 계산할 때 사용
+                model.put_data((s, a, r, s_prime, prob[a].item(), done)) ## prob[a].item() : action에 대한 확률값 -> ratio 계산할 때 사용
                 s = s_prime
                 score += r
                 if done:
@@ -177,22 +169,96 @@ def main_ppo(): # 빠른 버전
         # if n_epi%print_interval==0 and n_epi!=0:
         #     print("# of episode :{}, avg score : {:.1f}".format(n_epi, score/print_interval))
         #     score = 0.0
-        #f_beta_score = fbeta_score(pred_lst, true_lst, average = 'micro', beta = beta_val)
-        #print(precision_score(pred_lst,true_lst)
-        #print(recall_score(pred_lst, true_lst)
-        print(confusion_matrix(true_lst, pred_lst)) # hyperparameter tuning -> 유전알고리즘 이용해서 자동화도 됨, 오래걸리긴 함 / 중요도 낮은 hyperparameter는 크게 안바꿔도
-        precision, recall, f_beta_score = cal_fbetascore(true_lst, pred_lst, beta_val) # 분모에 작은 값 넣기 / if문써서 분모 0이면 다른 값 출력하도록 (분모 0인경우에는 !score 0!이거나 계산안하도록) // 논문 beta // reward, hyperparameter 튜닝
-
-        print("precision :{:.4f}, recall :{:.4f}, f_score :{:.4f}".format(precision, recall, f_beta_score))
-        #print("# of data :{}, length :{}, avg score : {:.1f}, f_score :{:.3f}".format(n_epi, len(time_arr), score, f_beta_score))
+        f_beta_score = cal_fbetascore(pred_lst, true_lst, beta)
+        print("# of episode :{}, length :{}, avg score : {:.1f}, f_score :{:.3f}".format(n_epi, len(time_arr), score, f_beta_score))
         score = 0.0
-        #print(fbeta_score(true_lst, pred_lst, average = 'macro', beta = 0.5))
-        #print(fbeta_score(true_lst, pred_lst, average = 'micro', beta = 1))
-        #print(fbeta_score(true_lst, pred_lst, average = 'weighted', beta = 1))
-        #print(fbeta_score(true_lst, pred_lst, average = None, beta = 1))
+        #print(fbeta_score(pred_lst, true_lst, average = 'macro', beta = 0.5))
+        #print(fbeta_score(pred_lst, true_lst, average = 'micro', beta = 1))
+        #print(fbeta_score(pred_lst, true_lst, average = 'weighted', beta = 1))
+        #print(fbeta_score(pred_lst, true_lst, average = None, beta = 1))
 
     print('-'*80)
 
+######## 속도 느림 ########
+def main_ppo_1(): 
+    ######################## make environment ########################
+    model = PPO()
+    score = 0.0
+    print('-'*80)
+    ##################################################################
+    for n_epi in range(10): #10000
+        time_arr, val_arr, label_arr = get_nth_data(n_epi)
+        #s = env.reset() 
+        s = time_arr[0]
+        done = False
+        while not done:
+            for t in range(len(time_arr)): #T_horizon ## T_horizon step 만큼 data 모으고 학습진행 -> 똑똑해진 policy가 다음 step 만큼 진행 
+                #print(len(time_arr))
+                prob = model.pi(torch.from_numpy(s).float())
+                m = Categorical(prob)
+                a = m.sample().item()
+                #s_prime, r, done, info = env.step(a)
+                s_prime = time_arr[t+1]
+                r = reward(label_arr[t], a)
+                #print(r)
+                if(r==None):
+                    print(label_arr[t])
+                    print(a)
+                    print(reward(label_arr[t], a))
+                    print(r)
+                if t == len(time_arr)-2:
+                    done = True
+                else:
+                    done = False
+                
+
+
+                model.put_data((s, a, r, s_prime, prob[a].item(), done)) ## prob[a].item() : action에 대한 확률값 -> ratio 계산할 때 사용
+                s = s_prime
+                score += r
+                if done:
+                    break
+
+            model.train_net()
+
+        # if n_epi%print_interval==0 and n_epi!=0:
+        #     print("# of episode :{}, avg score : {:.1f}".format(n_epi, score/print_interval))
+        #     score = 0.0
+        print("# of episode :{}, length :{}, avg score : {:.1f}".format(n_epi, len(time_arr), score))
+        score = 0.0
+    print('-'*80)
+
+####### pangyou 버전 #######
+def main_orig(): 
+    env = gym.make('CartPole-v1')
+    model = PPO()
+    score = 0.0
+    print_interval = 20
+
+    for n_epi in range(10000):
+        s = env.reset()
+        done = False
+        while not done:
+            for t in range(T_horizon):
+                prob = model.pi(torch.from_numpy(s).float())
+                m = Categorical(prob)
+                a = m.sample().item()
+                s_prime, r, done, info = env.step(a)
+
+                model.put_data((s, a, r/100.0, s_prime, prob[a].item(), done))
+                s = s_prime
+
+                score += r
+                if done:
+                    break
+
+            model.train_net()
+
+        if n_epi%print_interval==0 and n_epi!=0:
+            print("# of episode :{}, avg score : {:.1f}".format(n_epi, score/print_interval))
+            score = 0.0
+
+    env.close()
 
 if __name__ == '__main__':
     main_ppo()

@@ -64,10 +64,22 @@ def Yahoo_Dataprocessing(args):
 
     train = []    
     test = []
+    cnt_ones = 0
+    print('split_bar : ', split_bar)
+    print('split_bar[0] : ', split_bar[0])
+    print('split_bar[1] : ', split_bar[1])
+    
     if args.using_data == 'A1':
+        cnt_a1 = 0
         for i, fn  in enumerate(files_a1):
             df = pd.read_csv(fn)
-            if i < split_bar[0]: # train
+
+            #print('count : ', df['is_anomaly'].tolist().count(1))
+            #if (i==2):
+            #    print('type : ', df['is_anomaly'].tolist().count(1))
+            if (df['is_anomaly'].tolist() == 1):
+                cnt_a1 = cnt_a1 + 1
+            if len(train) < split_bar[0]: # train
                 train.append({
                 'timestamp': df['timestamp'].tolist(),
                 'value': minmax_scale(df['value'].tolist()),
@@ -79,6 +91,7 @@ def Yahoo_Dataprocessing(args):
                 'value': minmax_scale(df['value'].tolist()),
                 'label': df['is_anomaly'].tolist()
                 })
+    
     elif args.using_data == 'A2':
         for i, fn in enumerate(files_a2):
             df = pd.read_csv(fn)

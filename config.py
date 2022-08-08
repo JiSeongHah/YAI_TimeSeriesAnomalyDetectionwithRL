@@ -21,4 +21,6 @@ def get_parse():
     #parameters
     args.batch_size = 150
 
+    print('data set : ', args.using_data)
+
     return args    
