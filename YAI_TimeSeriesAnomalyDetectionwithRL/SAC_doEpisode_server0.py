@@ -28,7 +28,7 @@ SHUFFLE = doShuffle[0]
 
 anomalyRatio = 0.1
 
-wSize= 24
+wSize= 25
 updateTargetTerm = 32
 
 resultSaveDir = dir + mk_name(shuffle=SHUFFLE,
