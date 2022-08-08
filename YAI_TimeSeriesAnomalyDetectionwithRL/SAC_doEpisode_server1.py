@@ -23,33 +23,36 @@ scalingMethodLst = ['minMax','zScore']
 doShuffle = [True,False]
 
 scalingMethod = scalingMethodLst[0]
-SHUFFLE = doShuffle[1]
+SHUFFLE = doShuffle[0]
 
 
-wSizeLst = [10*i for i in range(4,30)]
-updateTargetTermLst = [2**(i+1) for i in range(4,10)]
+anomalyRatio = 0.2
+
+wSize= 24
+updateTargetTerm = 32
+
+resultSaveDir = dir + mk_name(shuffle=SHUFFLE,
+                              wSize=wSize,
+                              scalingMethod=scalingMethod,
+                              updateTerm=updateTargetTerm) + '/'
+createDirectory(resultSaveDir)
+
+loop = MainLoop(baseDir=dir,
+                resultSaveDir=resultSaveDir,
+                windowSize=[wSize],
+                batchSize=256,
+                beta=1,
+                gpuUse=True,
+                anomalyRatio=anomalyRatio,
+                doEpiShuffle=SHUFFLE,
+                updateTargetNetTerm=updateTargetTerm,
+                scalingMethod=scalingMethod)
+
+do = loop.StartTrnAndVal(501)
+print('testline2')
 
 
-for updateTargetTerm in updateTargetTermLst:
-    for wSize in wSizeLst:
 
-        resultSaveDir = dir + mk_name(shuffle=SHUFFLE,
-                                      wSize=wSize,
-                                      scalingMethod=scalingMethod,
-                                      updateTerm=updateTargetTerm) + '/'
-        createDirectory(resultSaveDir)
-
-        loop = MainLoop(baseDir=dir,
-                        resultSaveDir=resultSaveDir,
-                        windowSize=[wSize],
-                        batchSize=256,
-                        beta=1,
-                        gpuUse=True,
-                        doEpiShuffle=SHUFFLE,
-                        updateTargetNetTerm=updateTargetTerm,
-                        scalingMethod=scalingMethod)
-
-        do = loop.StartTrnAndVal(501)
 
 
 
