@@ -21,6 +21,7 @@ class MainLoop():
                  beta,
                  gpuUse,
                  doEpiShuffle,
+                 anomalyRatio,
                  batchSize,
                  updateTargetNetTerm,
                  scalingMethod):
@@ -35,6 +36,7 @@ class MainLoop():
         self.batchSize = batchSize
         self.updateTargetNetTerm = updateTargetNetTerm
         self.gpuUse = gpuUse
+        self.anomalyRatio = anomalyRatio
 
 
         self.episodeDataset = theDataset(baseDir=self.baseDir,
@@ -60,6 +62,7 @@ class MainLoop():
         self.Agent = Agent(input_dims=self.windowSize,
                            batch_size=self.batchSize,
                            plotSaveDir=self.resultSaveDir,
+                           anomalyRatio=self.anomalyRatio,
                            gpuUse=self.gpuUse)
 
         self.rewardDict = rewardDict
@@ -200,10 +203,13 @@ class MainLoop():
 
             state,label = nextState, nextLabel
 
-            if self.Agent.memory.mem_cntr > self.batchSize:
+            if self.Agent.memoryAnomaly.mem_cntr > self.batchSize and\
+                self.Agent.memoryNormal.mem_cntr > self.batchSize:
                 self.Agent.learn()
 
-            if idx % self.updateTargetNetTerm == 0 and self.Agent.memory.mem_cntr > self.batchSize:
+            if idx % self.updateTargetNetTerm == 0 and\
+                    self.Agent.memoryAnomaly.mem_cntr > self.batchSize and\
+                    self.Agent.memoryNormal.mem_cntr > self.batchSize:
                 self.Agent.updateTarget()
                 self.Agent.flushLst()
 

@@ -16,6 +16,7 @@ class Agent():
                  plotSaveDir,
                  input_dims=[8],
                  gpuUse= True,
+                 anomalyRatio=0.1,
                  lr=3e-4,
                  gamma=0.99,
                  n_actions=2,
@@ -29,11 +30,13 @@ class Agent():
         createDirectory(self.plotSaveDir)
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(max_size, input_dims, n_actions)
+        self.memoryNormal = ReplayBuffer(max_size, input_dims, n_actions)
+        self.memoryAnomaly = ReplayBuffer(max_size, input_dims, n_actions)
         self.batch_size = batch_size
         self.n_actions = n_actions
         self.gpuUse = gpuUse
         self.scale = reward_scale
+        self.anomalyRatio = anomalyRatio
 
         self.targetEntropyRatio = targetEntropyRatio
 
@@ -119,7 +122,10 @@ class Agent():
                  new_state,
                  done):
 
-        self.memory.store_transition(state, action, reward, new_state, done)
+        if reward[0] in ['TP','FN']:
+            self.memoryAnomaly.store_transition(state, action, reward[1], new_state, done)
+        if reward[0] in ['FP','TN']:
+            self.memoryNormal.store_transition(state, action, reward[1], new_state, done)
 
 
     def save_models(self):
@@ -217,7 +223,8 @@ class Agent():
 
     def learn(self):
 
-        if self.memory.mem_cntr < self.batch_size:
+        if self.memoryAnomaly.mem_cntr < self.batch_size or\
+            self.memoryNormal.mem_cntr < self.batch_size:
             return
 
         # self.actor.to(self.device)
@@ -235,7 +242,10 @@ class Agent():
         # print('c is in', self.alpha.device)
         # print('d is in ',self.targetCritic.device)
 
-        BATCH = self.memory.sample_buffer(self.batch_size)
+        BATCH = torch.cat(self.memoryAnomaly.sample_buffer(int( self.anomalyRatio * self.batch_size )),
+                          self.memoryNormal.sample_buffer(int( (1-self.anomalyRatio) * self.batch_size)))
+
+        BATCH = BATCH[torch.randperm(BATCH.size()[0])]
 
         q1_loss, q2_loss, errors, mean_q1, mean_q2 = \
             self.calcCriticLoss(BATCH)
