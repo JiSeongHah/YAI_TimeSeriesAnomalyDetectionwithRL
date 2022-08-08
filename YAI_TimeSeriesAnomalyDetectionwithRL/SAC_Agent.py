@@ -122,10 +122,10 @@ class Agent():
                  new_state,
                  done):
 
-        if reward[0] in ['TP','FN']:
-            self.memoryAnomaly.store_transition(state, action, reward[1], new_state, done)
-        if reward[0] in ['FP','TN']:
-            self.memoryNormal.store_transition(state, action, reward[1], new_state, done)
+        if reward[1] in ['TP','FN']:
+            self.memoryAnomaly.store_transition(state, action, reward[0], new_state, done)
+        if reward[1] in ['FP','TN']:
+            self.memoryNormal.store_transition(state, action, reward[0], new_state, done)
 
 
     def save_models(self):
@@ -242,10 +242,24 @@ class Agent():
         # print('c is in', self.alpha.device)
         # print('d is in ',self.targetCritic.device)
 
-        BATCH = torch.cat(self.memoryAnomaly.sample_buffer(int( self.anomalyRatio * self.batch_size )),
-                          self.memoryNormal.sample_buffer(int( (1-self.anomalyRatio) * self.batch_size)))
+        BATCH_anomaly = self.memoryAnomaly.sample_buffer(int( self.anomalyRatio * self.batch_size ))
+        BATCH_normal = self.memoryNormal.sample_buffer(int( (1-self.anomalyRatio) * self.batch_size))
 
-        BATCH = BATCH[torch.randperm(BATCH.size()[0])]
+        stateConcat = torch.cat((BATCH_anomaly[0],BATCH_normal[0]))
+        actionConcat = torch.cat((BATCH_anomaly[1],BATCH_normal[1]))
+        rewardConcat = torch.cat((BATCH_anomaly[2],BATCH_normal[2]))
+        nexStateConcat = torch.cat((BATCH_anomaly[3],BATCH_normal[3]))
+        doneConcat = torch.cat((BATCH_anomaly[4],BATCH_normal[4]))
+
+        shuffleIdx = torch.randperm(stateConcat.size(0))
+
+        stateConcat = stateConcat[shuffleIdx]
+        actionConcat = actionConcat[shuffleIdx]
+        rewardConcat = rewardConcat[shuffleIdx]
+        nexStateConcat = nexStateConcat[shuffleIdx]
+        doneConcat = doneConcat[shuffleIdx]
+
+        BATCH = stateConcat,actionConcat,rewardConcat,nexStateConcat,doneConcat
 
         q1_loss, q2_loss, errors, mean_q1, mean_q2 = \
             self.calcCriticLoss(BATCH)

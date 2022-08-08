@@ -197,7 +197,7 @@ class MainLoop():
             # print(f'nextState is :{nextState.size()}')
             self.Agent.remember(state=state,
                                 action=action,
-                                reward=reward[0],
+                                reward=reward,
                                 new_state=nextState,
                                 done=done)
 
