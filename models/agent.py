@@ -106,7 +106,7 @@ class ICMagent:
         
         reward = i_reward.detach()
         reward += reward_batch 
-        qvals = self.targetnetwork(state2_batch.detach())  # 여기서 문제 
+        qvals = self.targetnetwork(state2_batch.detach())
         reward += args.gamma * torch.max(qvals,dim=1)[0].view(-1,1) #batch,1
 
         reward_pred = self.qnetwork(state1_batch.detach())
