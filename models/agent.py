@@ -127,7 +127,7 @@ class ICMagent:
         for i in range(num_test):
             _,state,label = test_data[i]
             state = np.array(state)
-            state = state.reshape(-1,args.window_size,2)
+            state = state.transpose().reshape(-1,args.window_size,2)
             a_pred = self.get_action(state,greedy = True)
             a_true = label
             score = fbeta_score(a_pred,a_true,args.beta)
