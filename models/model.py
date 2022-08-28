@@ -16,13 +16,13 @@ class ICMModel(nn.Module):
 
         self.forward_net = nn.Sequential(
             nn.Linear(2 + 64 ,256),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Linear(256, 64)
         ).to(self.device)
         
         for p in self.modules():
             if isinstance(p, nn.Linear):
-                nn.init.kaiming_uniform_(p.weight, a=1.0)
+                nn.init.kaiming_uniform_(p.weight)
                 p.bias.data.zero_()
             
     def forward(self, inputs):
@@ -34,9 +34,7 @@ class ICMModel(nn.Module):
         # get pred next state
         pred_next_state = torch.cat((state.detach(), action), 1)
         pred_next_state = self.forward_net(pred_next_state)
-
         
-
         return next_state, pred_next_state, pred_action
 
 class Qnetwork(nn.Module):
