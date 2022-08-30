@@ -3,7 +3,7 @@
 
 **[YAI](https://yai-yonsei.tistory.com)(Yonsei university Artificial Intelligence)**  
 
-TEAM : 이찬미, 하지성, 이상민
+TEAM : 이찬미, 하지성, 이상민 -> branch 별로 정리
 
 ---
 # Datasets
